@@ -9,13 +9,15 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.widget.Toast
 import com.android.example.currencyconverter.adapter.ConverterAdapter
-import com.android.example.currencyconverter.model.Currency
+import com.android.example.currencyconverter.model.entity.Currency
 import com.android.example.currencyconverter.viewmodel.ConverterViewModel
+import java.math.BigDecimal
 
 class MainActivity : AppCompatActivity(), ConverterAdapter.OnClickListener {
     @VisibleForTesting lateinit var recyclerView: RecyclerView
 
     @VisibleForTesting lateinit var viewAdapter: ConverterAdapter
+
     @VisibleForTesting lateinit var viewManager: RecyclerView.LayoutManager
     @VisibleForTesting lateinit var viewModel: ConverterViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,7 +37,6 @@ class MainActivity : AppCompatActivity(), ConverterAdapter.OnClickListener {
 
         subscribeUi()
     }
-
     private fun subscribeUi() {
         viewModel.currencies.observe(this, Observer<List<Currency>> { list ->
             if (list != null) {
@@ -52,5 +53,9 @@ class MainActivity : AppCompatActivity(), ConverterAdapter.OnClickListener {
 
     override fun onItemClicked(currency: Currency) {
         viewModel.onItemClicked(currency)
+    }
+
+    override fun onRateChanged(rate: BigDecimal) {
+        viewModel.onRateChanged(rate)
     }
 }

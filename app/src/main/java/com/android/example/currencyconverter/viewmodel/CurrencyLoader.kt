@@ -3,10 +3,11 @@ package com.android.example.currencyconverter.viewmodel
 import android.os.AsyncTask
 import android.support.annotation.MainThread
 import android.support.annotation.WorkerThread
-import com.android.example.currencyconverter.model.Currency
+import com.android.example.currencyconverter.model.entity.Currency
 import com.android.example.currencyconverter.model.repository.Service
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.math.BigDecimal
 
 
 class CurrencyLoader(private val listener: CurrencyLoaderListener) : AsyncTask<Void, List<Currency>, List<Currency>>() {
@@ -31,9 +32,16 @@ class CurrencyLoader(private val listener: CurrencyLoaderListener) : AsyncTask<V
 
     private val lock = java.lang.Object()
     @Volatile private var base: String = "EUR"
-    @Volatile private var rate: Float = 1f
+    @Volatile private var rate: BigDecimal = BigDecimal.ONE
 
-    fun setRate(base: String, rate: Float) {
+    fun setRate(rate: BigDecimal) {
+        synchronized(lock) {
+            this.rate = rate
+            lock.notify()
+        }
+    }
+
+    fun setRate(base: String, rate: BigDecimal) {
         synchronized(lock) {
             this.base = base
             this.rate = rate
@@ -54,7 +62,7 @@ class CurrencyLoader(private val listener: CurrencyLoaderListener) : AsyncTask<V
     private fun loadFromNetwork() {
         val list = ArrayList<Currency>()
         var base = ""
-        var rate = 0.0f
+        var rate = BigDecimal.ZERO
         synchronized(lock) {
             base = this.base
             rate = this.rate
@@ -64,7 +72,7 @@ class CurrencyLoader(private val listener: CurrencyLoaderListener) : AsyncTask<V
         if (response.isSuccessful) {
             val currencyResponse = response.body()
             currencyResponse?.rates?.entries?.forEach {
-                list.add(Currency(it.key, it.value*rate))
+                list.add(Currency(it.key, it.value * rate))
             }
             publishProgress(list)
         } else {

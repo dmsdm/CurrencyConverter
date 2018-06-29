@@ -5,7 +5,8 @@ import android.arch.lifecycle.AndroidViewModel
 import android.arch.lifecycle.MutableLiveData
 import android.support.annotation.MainThread
 import android.support.annotation.WorkerThread
-import com.android.example.currencyconverter.model.Currency
+import com.android.example.currencyconverter.model.entity.Currency
+import java.math.BigDecimal
 
 class ConverterViewModel(application: Application) : AndroidViewModel(application), CurrencyLoader.CurrencyLoaderListener {
 
@@ -38,7 +39,11 @@ class ConverterViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun onItemClicked(currency: Currency) {
-        loader.setRate(currency.title, 1f)
+        loader.setRate(currency.title, BigDecimal.ONE)
         shouldScroll = true
+    }
+
+    fun onRateChanged(rate: BigDecimal) {
+        loader.setRate(rate)
     }
 }

@@ -2,18 +2,22 @@ package com.android.example.currencyconverter.adapter
 
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import com.android.example.currencyconverter.R
-import com.android.example.currencyconverter.model.Currency
+import com.android.example.currencyconverter.model.entity.Currency
+import java.math.BigDecimal
 
 class ConverterAdapter(val listener: OnClickListener) : RecyclerView.Adapter<ConverterAdapter.CurrencyHolder>() {
 
     interface OnClickListener {
         fun onItemClicked(currency: Currency)
+        fun onRateChanged(rate: BigDecimal)
     }
 
     private var currencies: List<Currency> = ArrayList()
@@ -37,7 +41,8 @@ class ConverterAdapter(val listener: OnClickListener) : RecyclerView.Adapter<Con
                 }
 
                 override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-                    return currencies[oldItemPosition].value.equals(newCurrencies[newItemPosition].value)
+                    return (oldItemPosition == 0 && newItemPosition == 0)
+                        ||currencies[oldItemPosition].value.equals(newCurrencies[newItemPosition].value)
                 }
             })
             currencies = newCurrencies
@@ -66,8 +71,49 @@ class ConverterAdapter(val listener: OnClickListener) : RecyclerView.Adapter<Con
             val currency = currencies[adapterPosition]
             title.text = currency.title
             value.setText("%.2f".format(currency.value))
+            value.setOnFocusChangeListener { v, hasFocus ->
+                if (hasFocus && adapterPosition > 0) {
+                    listener.onItemClicked(currency)
+                } else if (hasFocus) {
+                    setTextChangedListener(v)
+                } else {
+                    removeTextChangedListener(v)
+                }
+            }
             itemView.setOnClickListener {
+                value.requestFocus()
                 listener.onItemClicked(currency)
+            }
+        }
+
+        val textWatcher = object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                try {
+                    val rate = BigDecimal(s.toString())
+                    listener.onRateChanged(rate)
+                } catch (e: NumberFormatException) {
+                    value.setError("incorrect value")
+                }
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+            }
+        }
+
+        private fun setTextChangedListener(v: View?) {
+            if (v is EditText) {
+                v.addTextChangedListener(textWatcher)
+            }
+        }
+
+        private fun removeTextChangedListener(v: View?) {
+            if (v is EditText) {
+                v.removeTextChangedListener(textWatcher)
             }
         }
     }
