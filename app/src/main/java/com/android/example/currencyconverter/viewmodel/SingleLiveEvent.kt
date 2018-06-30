@@ -26,6 +26,14 @@ class SingleLiveEvent<T>: MutableLiveData<T>() {
         })
     }
 
+    override fun observeForever(observer: Observer<T>) {
+        super.observeForever { t ->
+            if (pending.compareAndSet(true, false)) {
+                observer.onChanged(t)
+            }
+        }
+    }
+
     @MainThread
     override fun setValue(@Nullable t: T?) {
         pending.set(true)

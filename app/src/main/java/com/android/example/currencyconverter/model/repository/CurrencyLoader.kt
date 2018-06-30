@@ -1,16 +1,17 @@
-package com.android.example.currencyconverter.viewmodel
+package com.android.example.currencyconverter.model.repository
 
 import android.os.AsyncTask
 import android.support.annotation.MainThread
 import android.support.annotation.WorkerThread
 import com.android.example.currencyconverter.model.entity.Currency
-import com.android.example.currencyconverter.model.repository.Service
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.math.BigDecimal
 
 
-class CurrencyLoader(private val listener: CurrencyLoaderListener) : AsyncTask<Void, List<Currency>, List<Currency>>() {
+class CurrencyLoader(private val listener: CurrencyLoaderListener,
+                     private val repository: CurrencyRepository? = null) :
+        AsyncTask<Void, List<Currency>, List<Currency>>() {
 
     interface CurrencyLoaderListener {
         @MainThread

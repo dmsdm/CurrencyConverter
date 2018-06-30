@@ -14,12 +14,12 @@ import com.android.example.currencyconverter.viewmodel.ConverterViewModel
 import java.math.BigDecimal
 
 class MainActivity : AppCompatActivity(), ConverterAdapter.OnClickListener {
+
     @VisibleForTesting lateinit var recyclerView: RecyclerView
-
     @VisibleForTesting lateinit var viewAdapter: ConverterAdapter
-
     @VisibleForTesting lateinit var viewManager: RecyclerView.LayoutManager
     @VisibleForTesting lateinit var viewModel: ConverterViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
