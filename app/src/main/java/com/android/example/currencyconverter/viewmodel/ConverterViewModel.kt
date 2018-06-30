@@ -2,40 +2,47 @@ package com.android.example.currencyconverter.viewmodel
 
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
-import android.arch.lifecycle.MutableLiveData
-import android.support.annotation.MainThread
+import android.arch.lifecycle.MediatorLiveData
 import android.support.annotation.VisibleForTesting
 import android.support.annotation.WorkerThread
+import com.android.example.currencyconverter.ConverterApplication
 import com.android.example.currencyconverter.model.entity.Currency
-import com.android.example.currencyconverter.model.repository.CurrencyLoader
+import com.android.example.currencyconverter.model.repository.CurrencyNetworkLoaderImpl
 import java.math.BigDecimal
 
 class ConverterViewModel(application: Application, test: Any? = null) : AndroidViewModel(application),
-        CurrencyLoader.CurrencyLoaderListener {
+        ConverterInteractor.InteractorListener {
 
-    val currencies : MutableLiveData<List<Currency>> = MutableLiveData()
+    val currencies : MediatorLiveData<List<Currency>> = MediatorLiveData()
     val error: SingleLiveEvent<String> = SingleLiveEvent()
     val scrollToPosition: SingleLiveEvent<Int> = SingleLiveEvent()
-    @VisibleForTesting lateinit var loader: CurrencyLoader
+    @VisibleForTesting lateinit var interactor: ConverterInteractor
     private var shouldScroll = false
 
 
     constructor(application: Application) : this(application, null) {
-        loader = CurrencyLoader(this)
-        loader.execute()
+        if (application is ConverterApplication) {
+            val currencyRepository = application.getCurrencyRepository()
+            interactor = ConverterInteractor(this, currencyRepository)
+            interactor.startUpdates(CurrencyNetworkLoaderImpl(interactor, currencyRepository))
+            currencies.addSource(interactor.currencies) { list ->
+                if (list != null) {
+                    setList(list)
+                }
+            }
+        }
     }
 
-    override fun onCleared() {
-        loader.cancel(false)
-    }
-
-    @MainThread
-    override fun onProgressChange(list: List<Currency>) {
+    @VisibleForTesting fun setList(list: List<Currency>) {
         currencies.value = list
         if (shouldScroll) {
             shouldScroll = false
             scrollToPosition.value = 0
         }
+    }
+
+    override fun onCleared() {
+        interactor.stopUpdates()
     }
 
     @WorkerThread
@@ -45,10 +52,10 @@ class ConverterViewModel(application: Application, test: Any? = null) : AndroidV
 
     fun onItemClicked(currency: Currency) {
         shouldScroll = true
-        loader.setRate(currency.title, BigDecimal.ONE)
+        interactor.setBase(currency.title, currency.value)
     }
 
     fun onRateChanged(rate: BigDecimal) {
-        loader.setRate(rate)
+        interactor.setRate(rate)
     }
 }

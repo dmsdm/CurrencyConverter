@@ -2,7 +2,6 @@ package com.android.example.currencyconverter.viewmodel
 
 import com.android.example.currencyconverter.LiveDataTestUtil
 import com.android.example.currencyconverter.model.entity.Currency
-import com.android.example.currencyconverter.model.repository.CurrencyLoader
 import org.junit.Before
 import org.junit.Test
 
@@ -22,7 +21,7 @@ class ConverterViewModelTest {
     @Before
     fun setUp() {
         viewModel = ConverterViewModel(RuntimeEnvironment.application, null)
-        viewModel.loader = Mockito.mock(CurrencyLoader::class.java)
+        viewModel.interactor = Mockito.mock(ConverterInteractor::class.java)
     }
 
     @Test
@@ -36,16 +35,6 @@ class ConverterViewModelTest {
     }
 
     @Test
-    fun onProgressChange() {
-        val expected = ArrayList<Currency>()
-        expected.add(Currency("test", BigDecimal.ONE))
-
-        viewModel.onProgressChange(expected)
-
-        assertArraysEqual(expected)
-    }
-
-    @Test
     fun onError() {
         viewModel.onError("error")
 
@@ -56,15 +45,15 @@ class ConverterViewModelTest {
     @Test
     fun scrollToZero_whenOnItemClicked() {
         val currency = Currency("test", BigDecimal.ONE)
-        var list = ArrayList<Currency>()
+        val list = ArrayList<Currency>()
         list.add(currency)
-        `when`(viewModel.loader.setRate(currency.title, currency.value)).then {
-            viewModel.onProgressChange(list)
+        `when`(viewModel.interactor.setBase(currency.title, currency.value)).then {
+            viewModel.setList(list)
         }
 
         viewModel.onItemClicked(currency)
 
-        var position = LiveDataTestUtil.getValue(viewModel.scrollToPosition)
+        val position = LiveDataTestUtil.getValue(viewModel.scrollToPosition)
         assertEquals(0, position)
         assertArraysEqual(list)
     }
@@ -82,6 +71,6 @@ class ConverterViewModelTest {
     fun onRateChanged() {
         viewModel.onRateChanged(BigDecimal.TEN)
 
-        Mockito.verify(viewModel.loader).setRate(BigDecimal.TEN)
+        Mockito.verify(viewModel.interactor).setRate(BigDecimal.TEN)
     }
 }

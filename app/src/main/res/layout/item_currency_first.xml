@@ -34,13 +34,13 @@
         app:layout_constraintTop_toBottomOf="@+id/title" />
 
 
-    <TextView
+    <EditText
         android:id="@+id/value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:focusable="false"
-        style="@style/Widget.AppCompat.EditText"
+        android:maxLength="10"
+        android:inputType="numberDecimal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/title"
         app:layout_constraintEnd_toEndOf="parent"

@@ -40,14 +40,16 @@ class MainActivity : AppCompatActivity(), ConverterAdapter.OnClickListener {
     private fun subscribeUi() {
         viewModel.currencies.observe(this, Observer<List<Currency>> { list ->
             if (list != null) {
-                viewAdapter.setCurrencies(list)
+                viewAdapter.submitList(list)
             }
         })
         viewModel.error.observe(this, Observer { message ->
             Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         })
         viewModel.scrollToPosition.observe(this, Observer { position ->
-            viewManager.scrollToPosition(0)
+            recyclerView.postDelayed({
+                position?.let { viewManager.smoothScrollToPosition(recyclerView, null, it) }
+            }, 500)
         })
     }
 
