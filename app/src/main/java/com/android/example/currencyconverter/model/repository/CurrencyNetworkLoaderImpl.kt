@@ -1,20 +1,15 @@
 package com.android.example.currencyconverter.model.repository
 
 import android.os.AsyncTask
-import android.support.annotation.WorkerThread
+import android.support.annotation.VisibleForTesting
 import com.android.example.currencyconverter.model.entity.Currency
 
 
-class CurrencyNetworkLoaderImpl(private val listener: CurrencyLoaderListener,
+class CurrencyNetworkLoaderImpl(private val listener: CurrencyNetworkLoader.CurrencyLoaderListener,
                                 private val repository: CurrencyRepository? = null) :
         AsyncTask<Void, List<Currency>, List<Currency>>(), CurrencyNetworkLoader {
 
-    interface CurrencyLoaderListener {
-        @WorkerThread
-        fun onError(error: String)
-    }
-
-    private val lock = java.lang.Object()
+    @VisibleForTesting val lock = java.lang.Object()
     @Volatile private lateinit var base: String
 
     override fun setBase(base: String) {

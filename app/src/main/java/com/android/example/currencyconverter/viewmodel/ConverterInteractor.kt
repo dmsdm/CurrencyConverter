@@ -4,13 +4,12 @@ import android.arch.lifecycle.MediatorLiveData
 import android.support.annotation.WorkerThread
 import com.android.example.currencyconverter.model.entity.Currency
 import com.android.example.currencyconverter.model.repository.CurrencyNetworkLoader
-import com.android.example.currencyconverter.model.repository.CurrencyNetworkLoaderImpl
 import com.android.example.currencyconverter.model.repository.CurrencyRepository
 import java.math.BigDecimal
 
 class ConverterInteractor(val listener: InteractorListener,
                           val currencyRepository: CurrencyRepository) :
-        CurrencyNetworkLoaderImpl.CurrencyLoaderListener {
+        CurrencyNetworkLoader.CurrencyLoaderListener {
 
     interface InteractorListener {
         @WorkerThread
