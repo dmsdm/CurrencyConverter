@@ -15,7 +15,6 @@ import android.widget.TextView
 import com.android.example.currencyconverter.R
 import com.android.example.currencyconverter.model.entity.Currency
 import java.math.BigDecimal
-import java.text.DecimalFormat
 import java.util.*
 
 
@@ -121,8 +120,7 @@ class ConverterAdapter(val listener: OnClickListener) : RecyclerView.Adapter<Rec
         val textWatcher = object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 try {
-                    val decimalFormat = DecimalFormat.getInstance()
-                    val rate = BigDecimal(decimalFormat.parse(s.toString()).toDouble())
+                    val rate = BigDecimal(s.toString())
                     listener.onRateChanged(rate)
                 } catch (ignore: Exception) {}
             }
