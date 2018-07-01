@@ -40,6 +40,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:focusable="false"
+        android:clickable="false"
         style="@style/Widget.AppCompat.EditText"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/title"

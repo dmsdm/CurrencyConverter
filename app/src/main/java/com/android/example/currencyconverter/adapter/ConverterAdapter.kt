@@ -1,5 +1,6 @@
 package com.android.example.currencyconverter.adapter
 
+import android.content.Context
 import android.support.v7.recyclerview.extensions.AsyncListDiffer
 import android.support.v7.util.DiffUtil
 import android.support.v7.widget.RecyclerView
@@ -8,13 +9,15 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
 import com.android.example.currencyconverter.R
 import com.android.example.currencyconverter.model.entity.Currency
 import java.math.BigDecimal
 import java.text.DecimalFormat
-import java.text.ParseException
+import java.util.*
+
 
 class ConverterAdapter(val listener: OnClickListener) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -93,16 +96,25 @@ class ConverterAdapter(val listener: OnClickListener) : RecyclerView.Adapter<Rec
             val currency = differ.currentList[adapterPosition]
             title.text = currency.title
             description.text = java.util.Currency.getInstance(currency.title).displayName
-            value.text = "%.2f".format(currency.value)
+            value.text = "%.2f".format(Locale.US, currency.value)
             value.setOnFocusChangeListener { v, hasFocus ->
                 if (hasFocus) {
+                    showKeyboard(v)
                     setTextChangedListener(v)
                 } else {
                     removeTextChangedListener(v)
                 }
             }
+            value.requestFocus()
             itemView.setOnClickListener {
                 listener.onItemClicked(currency)
+            }
+        }
+
+        private fun showKeyboard(v: View) {
+            val imm = itemView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
+            v.post {
+                imm?.showSoftInput(v, InputMethodManager.SHOW_IMPLICIT)
             }
         }
 
@@ -112,9 +124,7 @@ class ConverterAdapter(val listener: OnClickListener) : RecyclerView.Adapter<Rec
                     val decimalFormat = DecimalFormat.getInstance()
                     val rate = BigDecimal(decimalFormat.parse(s.toString()).toDouble())
                     listener.onRateChanged(rate)
-                } catch (e: ParseException) {
-                    value.setError("incorrect value")
-                }
+                } catch (ignore: Exception) {}
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -122,6 +132,7 @@ class ConverterAdapter(val listener: OnClickListener) : RecyclerView.Adapter<Rec
 
         private fun setTextChangedListener(v: View?) {
             if (v is EditText) {
+                v.removeTextChangedListener(textWatcher)
                 v.addTextChangedListener(textWatcher)
             }
         }
@@ -142,7 +153,7 @@ class ConverterAdapter(val listener: OnClickListener) : RecyclerView.Adapter<Rec
             val currency = differ.currentList[adapterPosition]
             title.text = currency.title
             description.text = java.util.Currency.getInstance(currency.title).displayName
-            value.text = "%.2f".format(currency.value)
+            value.text = "%.2f".format(Locale.US, currency.value)
             itemView.setOnClickListener {
                 listener.onItemClicked(currency)
             }
