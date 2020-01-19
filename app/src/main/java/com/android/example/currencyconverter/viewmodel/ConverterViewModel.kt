@@ -7,7 +7,7 @@ import android.support.annotation.VisibleForTesting
 import android.support.annotation.WorkerThread
 import com.android.example.currencyconverter.ConverterApplication
 import com.android.example.currencyconverter.model.entity.Currency
-import com.android.example.currencyconverter.model.repository.CurrencyNetworkLoaderImpl
+import com.android.example.currencyconverter.model.repository.RxNetworkLoaderImpl
 import java.math.BigDecimal
 
 class ConverterViewModel(application: Application, test: Any? = null) : AndroidViewModel(application),
@@ -24,7 +24,7 @@ class ConverterViewModel(application: Application, test: Any? = null) : AndroidV
         if (application is ConverterApplication) {
             val currencyRepository = application.getCurrencyRepository()
             interactor = ConverterInteractor(this, currencyRepository)
-            interactor.startUpdates(CurrencyNetworkLoaderImpl(interactor, currencyRepository))
+            interactor.startUpdates(RxNetworkLoaderImpl(interactor, currencyRepository))
             currencies.addSource(interactor.currencies) { list ->
                 if (list != null) {
                     setList(list)
